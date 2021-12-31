@@ -26,4 +26,11 @@
     ON co.`member_id`= c.`cart_member_id`
     WHERE c.`cart_status`='3'    
     AND co.`member_id`=1 AND cp.`c_product_category` != 'bx' 
+    -- --------------------------------------------------
+
+    
+    SELECT `share_title`, `share_img`
+    FROM `share_item` s
+    WHERE s.`share_order_category`='co' AND s.`share_status` = 0
+    AND s.`member_id`=1 
     
