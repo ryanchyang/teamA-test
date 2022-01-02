@@ -10,6 +10,8 @@ $share_id = intval($_GET['sid']);
 
 $row = $pdo->query("SELECT * FROM `share_item` WHERE `share_item_id`=$share_id")->fetch();
 
+
+
 if(empty($row)){
     header('Location: share.php');
     exit;
@@ -18,6 +20,11 @@ if(empty($row)){
 ?>
 <?php include __DIR__. '/parts/__html_head.php' ?>
 <?php include __DIR__. '/parts/__navbar.php' ?>
+<style>
+    form .form-text {
+        color: red;
+    }
+</style>
 
 <div class="container">
     <div class="row justify-content-center">
@@ -37,9 +44,12 @@ if(empty($row)){
 
                         <div class="mb-3">
                             <label for="pic" class="form-label">照片</label>
-                            <input type="file" class="form-control" id="pic" name="pic"
-                                   value="">
+                            <input type="file" class="form-control" id="pic" name="pic" accept="image/*"
+                                   value="" onchange="loadFile(event)">                                
                             <div class="form-text"></div>
+                            <div id="imgs">
+                                <img src="<?= $row['share_img'] ?>" id="output" width="200px">
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label for="desc" class="form-label">敘述</label>                       
@@ -49,16 +59,16 @@ if(empty($row)){
                             <div class="form-text"></div>
                         </div>
                         <div class="mb-3">
-                            <fieldset>
+                            <fieldset id="hashtags">
                                 <legend>標籤</legend>
-                                <label for="htage1">#</label>
-                                <input id="htage1" name="htage1" value="<?=explode("," ,$row['share_hash'])[0] ?? ''?>" />
+                                <label >#</label>
+                                <input id="htag1" name="htags[]" value="<?=explode("," ,$row['share_hash'])[0] ?? ''?>" />
 
-                                <label for="htage2">#</label>
-                                <input id="htage2" name="htage2" value="<?=explode("," ,$row['share_hash'])[1] ?? ''?>"/>
+                                <label >#</label>
+                                <input id="htag2" name="htags[]" value="<?=explode("," ,$row['share_hash'])[1] ?? ''?>"/>
 
-                                <label for="htage3">#</label>
-                                <input id="htage3" name="htage3" value="<?=explode("," ,$row['share_hash'])[2] ?? ''?>"/>
+                                <label >#</label>
+                                <input id="htag3" name="htags[]" value="<?=explode("," ,$row['share_hash'])[2] ?? ''?>"/>
                             </fieldset>
                             <div class="form-text"></div>
                         </div>
@@ -78,43 +88,61 @@ if(empty($row)){
     const title = document.querySelector('#title');
     const pic = document.querySelector('#pic');
     const desc = document.querySelector('#desc');
+    const imgsDiv = document.querySelector('#imgs');
+    const hashtags = document.querySelector('#hashtags');
+    const htag1 = document.querySelector('#htag1');
+    const htag2 = document.querySelector('#htag2');
+    const htag3 = document.querySelector('#htag3');
 
-    const modal = new bootstrap.Modal(document.querySelector('#exampleModal'));
+    // const modal = new bootstrap.Modal(document.querySelector('#exampleModal'));
 
-    const email_re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
-    const mobile_re = /^09\d{2}-?\d{3}-?\d{3}$/;
+    // const email_re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+    // const mobile_re = /^09\d{2}-?\d{3}-?\d{3}$/;
+
+
+    const loadFile = function(event) {
+    const reader = new FileReader();
+    reader.onload = function(){
+      const output = document.getElementById('output');
+      output.src = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  };
 
     function sendData(){
 
-        name.nextElementSibling.innerHTML = '';
-        email.nextElementSibling.innerHTML = '';
-        mobile.nextElementSibling.innerHTML = '';
+        // name.nextElementSibling.innerHTML = '';
+        // email.nextElementSibling.innerHTML = '';
+        // mobile.nextElementSibling.innerHTML = '';
 
         let isPass = true;
         // 檢查表單的資料
-        if(name.value.length < 2){
+        if(!title.value){
             isPass = false;
-            name.nextElementSibling.innerHTML = '請輸入正確的姓名';
-
+            title.nextElementSibling.innerHTML = '請輸入標題';
         }
-        if(email.value && !email_re.test(email.value)){
+        if(pic.files.length === 0){
             isPass = false;
-            email.nextElementSibling.innerHTML = '請輸入正確的email';
+            pic.nextElementSibling.innerHTML = '請上傳照片';
         }
-        if(mobile.value && !mobile_re.test(mobile.value)){
+        if(!desc.value){
             isPass = false;
-            mobile.nextElementSibling.innerHTML = '請輸入正確的手機號碼';
+            desc.nextElementSibling.innerHTML = '請輸入敘述';
         }
-
-
-
-
+        if(htag1.value.length > 30 || htag2.value.length > 30 || htag3.value.length > 30){
+            isPass = false;
+            hashtags.nextElementSibling.innerHTML = '標籤文字過長';
+        }
+               
+//         if( document.getElementById("videoUploadFile").files.length == 0 ){
+//     console.log("no files selected");
+// }
 
 
         if(isPass) {
             const fd = new FormData(document.form1);
 
-            fetch('edit-api.php', {
+            fetch('share_edit_api.php', {
                 method: 'POST',
                 body: fd,
             }).then(r => r.json())
@@ -122,11 +150,11 @@ if(empty($row)){
                     console.log(obj);
                     if(obj.success){
                         alert('修改成功');
-                        // location.href = 'list.php';
+                        location.href = 'share.php';
                     } else {
 
-                        document.querySelector('.modal-body').innerHTML = obj.error || '資料修改發生錯誤';
-                        modal.show();
+                        // document.querySelector('.modal-body').innerHTML = obj.error || '資料修改發生錯誤';
+                        // modal.show();
                     }
                 })
         }

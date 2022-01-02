@@ -45,7 +45,8 @@ $cuso_rows = $pdo->query($cuso_sql)->fetchAll();
             <th scope="row"><img src=" <?= $row['share_img'];?>" alt="" style="width:100px;"></th>       
             <th scope="row" class="pt-5  text-end">
               <a href="share_edit.php?sid=<?= $row['share_item_id'] ?>">分享</a>
-            <button type="button" class="btn btn-secondary ms-2">刪除</button></th>       
+              <a href="javascript: delete_it(<?= $row['share_item_id'] ?>)">刪除</a>
+            <!-- <button type="button" class="btn btn-secondary ms-2">刪除</button></th>        -->
             <!-- <th scope="row"><?= $row['share_status'] = '1' ? "已分享" : "未分享";?></th> -->
           </tr>
           <?php endforeach; ?>
@@ -80,4 +81,12 @@ $cuso_rows = $pdo->query($cuso_sql)->fetchAll();
 
 
 <?php include __DIR__ . '/parts/__scripts.php' ?>
+<script>
+   function delete_it(sid){
+        if(confirm(`確定要刪除編號為 ${sid} 的資料嗎?`)){
+            location.href = `share_delete_api.php?sid=${sid}`;
+        }
+    }
+</script>
+
 <?php include __DIR__ . '/parts/__html_foot.php' ?>
