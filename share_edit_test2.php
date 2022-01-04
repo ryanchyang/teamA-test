@@ -69,7 +69,7 @@ form .form-text {
 
             <div class="mb-3">
               <label for="pic" class="form-label">照片</label>
-              <input type="file" class="form-control visually-hidden" id="pic" name="pics[]" accept="image/*" multiple
+              <input type="file" class="form-control visually-hidden" id="pic" name="pics" accept="image/*" multiple
                 value="">
 
 
@@ -81,10 +81,8 @@ form .form-text {
 
 
               <div class="form-text"></div>
-              <div class="img-unit">
-                <p id="addpics"><i class="fas fa-plus"></i></p>
-              </div>
               <div id="imgs" class="d-flex flex-row " data-imgs="<?= $row['share_img'] ?>">
+
               </div>
             </div>
             <div class="mb-3">
@@ -128,12 +126,8 @@ const hashtags = document.querySelector('#hashtags');
 const htag1 = document.querySelector('#htag1');
 const htag2 = document.querySelector('#htag2');
 const htag3 = document.querySelector('#htag3');
-const addpics = document.querySelector('#addpics');
-
-console.log(addpics);
 
 let imgData = [];
-let dbfiles;
 
 // const modal = new bootstrap.Modal(document.querySelector('#exampleModal'));
 
@@ -142,14 +136,14 @@ let dbfiles;
 imgData.push(...imgsDiv.dataset.imgs.split(','))
 renderImgs();
 
-// pic.onchange = evt => {
-//   const [file] = pic.files
-//   if (file) {
+pic.onchange = evt => {
+  const [file] = pic.files
+  if (file) {
 
-//     addimg.src = URL.createObjectURL(file)
-//     addimg.closest('.img-unit').classList.remove('visually-hidden')
-//   }
-// }
+    addimg.src = URL.createObjectURL(file)
+    addimg.closest('.img-unit').classList.remove('visually-hidden')
+  }
+}
 
 
 
@@ -174,13 +168,16 @@ function renderImgs() {
     imgsDiv.innerHTML += imgUnitTpl(i);
   }
 
-  // imgsDiv.innerHTML += `<div
-  //       class="img-unit visually-hidden" >
-  //       <img id="addimg" src="#" alt="your image">
-  //       <a href="#"><i class="fas fa-times-circle del"></i></a>
-  //       </div> `;
+  imgsDiv.innerHTML += `<div
+        class="img-unit visually-hidden" >
+        <img id="addimg" src="#" alt="your image">
+        <a href="#"><i class="fas fa-times-circle del"></i></a>
+        </div> `;
 
-
+  imgsDiv.innerHTML += `<div
+        class="img-unit">
+        <a href="#" onclick="pic.click()"><i class="fas fa-plus my-plus"></i></a>
+        </div>`
 }
 
 imgsDiv.addEventListener('click', function(e) {
@@ -188,7 +185,7 @@ imgsDiv.addEventListener('click', function(e) {
 
   if (t.classList.contains('del')) {
     const filename = t.closest('.img-unit')?.dataset.file;
-    dbfiles= imgsDiv.dataset.imgs;
+    const dbfiles = imgsDiv.dataset.imgs;
     console.log(filename);
     console.log(dbfiles);
     
@@ -204,81 +201,21 @@ imgsDiv.addEventListener('click', function(e) {
       .then(obj => {
         console.log(obj);
         if (obj.success) {
-          // alert('修改成功');
-          // location.href = 'share.php';
+          alert('修改成功');
+          location.href = 'share.php';
           imgData=[];
-          imgData.push(...obj.dbfilename);
-          renderImgs();
-          imgsDiv.dataset.imgs = [...obj.dbfilename].join(',');  
-          
+          imgData.push(...obj.files);
+          renderImgs()
 
         } else {
 
           // document.querySelector('.modal-body').innerHTML = obj.error || '資料修改發生錯誤';
           // modal.show();
         }
-      })
-    
-    
-    // let loc = imgData.indexOf(filename);
-    // if (loc !== -1) {
-    //   imgData.splice(loc, 1);
-    //   renderImgs();
-    // }
   }
 });
 
-pic.addEventListener('change',function(){
 
-  //fetch 
-  const fd = new FormData();
-  dbfiles = imgsDiv.dataset.imgs;
-  fd.append('dbImg2',dbfiles);
-
-  for (let i = 0; i < pic.files.length; i++) {
-    let file = pic.files.item(i);
-    fd.append('addImg[]',file);
-}
-  
-
-
-  
-  fetch('share_edit_api_add.php', {
-        method: 'POST',
-        body: fd,
-      }).then(r => r.json())
-      .then(obj => {
-        console.log(obj);
-        if (obj.success) {
-          // alert('修改成功');
-          // location.href = 'share.php';
-          imgData=[];
-          imgData.push(...obj.dbfilename);
-          renderImgs()
-          imgsDiv.dataset.imgs = [...obj.dbfilename].join(',');  
-
-        } else {
-
-          // document.querySelector('.modal-body').innerHTML = obj.error || '資料修改發生錯誤';
-          // modal.show();
-        }
-})
-});
-addpics.addEventListener('click', function() {
-  pic.click();
-});
-
-// addpics.addEventListener('click', function() {
-
-//   const html =
-//     `<input type="file" class="addform form-control visually-hidden" id="pic${picNum}" name="pic${picNum}" accept="image/*" multiple />`;
-//   pic.insertAdjacentHTML('afterend', html);
-//   const picUpload = document.querySelector(`#pic${picNum}`);
-//   console.log(picUpload);
-//   picUpload.click();
-//   picNum++;
-
-// })
 
 function sendData() {
 
