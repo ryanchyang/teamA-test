@@ -24,31 +24,6 @@ if(empty($row)){
 form .form-text {
   color: red;
 }
-
-.img-unit>img {
-  width: 100px;
-
-}
-
-.img-unit {
-  margin-top: 10px;
-  margin-right: 10px;
-  position: relative;
-}
-
-.del {
-  position: absolute;
-  top: -20px;
-  right: 0px;
-  color: #ccc;
-}
-
-.my-plus {
-  font-size: 3rem;
-  color: blue;
-  margin-top: 40px;
-  margin-left: 30px;
-}
 </style>
 
 <div class="container">
@@ -63,26 +38,17 @@ form .form-text {
             <div class="mb-3">
               <label for="title" class="form-label">標題</label>
               <input type="text" class="form-control" id="title" name="title"
-                value="<?= htmlentities($row['share_title']) ?>">
+                placeholder="<?= htmlentities($row['share_title']) ?>">
               <div class="form-text"></div>
             </div>
 
             <div class="mb-3">
               <label for="pic" class="form-label">照片</label>
-              <input type="file" class="form-control visually-hidden" id="pic" name="pics[]" accept="image/*" multiple
-                value="">
-
-
-              <!-- <form runat="server">
-                <input accept="image/*" type='file' id="imgInp" />
-                <img id="blah" src="#" alt="your image" />
-              </form> -->
-
-
-
+              <input type="file" class="form-control " id="pic" name="pics[]" accept="image/*" multiple value="">
               <div class="form-text"></div>
-              <div id="imgs" class="d-flex flex-row " data-imgs="<?= $row['share_img'] ?>">
 
+              <div id="imgs">
+                <div id="preview"></div>
               </div>
             </div>
             <div class="mb-3">
@@ -133,69 +99,49 @@ let imgData = [];
 
 // const email_re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
 // const mobile_re = /^09\d{2}-?\d{3}-?\d{3}$/;
-imgData.push(...imgsDiv.dataset.imgs.split(','))
-renderImgs();
+function previewImages() {
 
-pic.onchange = evt => {
-  const [file] = pic.files
-  if (file) {
+  const preview = document.querySelector('#preview');
 
-    addimg.src = URL.createObjectURL(file)
-    addimg.closest('.img-unit').classList.remove('visually-hidden')
-  }
-}
-
-
-
-function imgUnitTpl(file) {
-  return `<div
-        class="img-unit"
-        data-file="${file}"
-      >
-        <img
-          src="pic/product/${file}"
-          alt=""
-        />
-
-        <a href="#"><i class="fas fa-times-circle del"></i></a>
-      </div> `;
-}
-
-function renderImgs() {
-  imgsDiv.innerHTML = ''; // 清空
-
-  for (let i of imgData) {
-    imgsDiv.innerHTML += imgUnitTpl(i);
+  if (this.files) {
+    [].forEach.call(this.files, readAndPreview);
   }
 
-  imgsDiv.innerHTML += `<div
-        class="img-unit visually-hidden" >
-        <img id="addimg" src="#" alt="your image">
-        <a href="#"><i class="fas fa-times-circle del"></i></a>
-        </div> `;
+  function readAndPreview(file) {
 
-  imgsDiv.innerHTML += `<div
-        class="img-unit">
-        <a href="#" onclick="pic.click()"><i class="fas fa-plus my-plus"></i></a>
-        </div>`
+    // Make sure `file.name` matches our extensions criteria
+    if (!/\.(jpe?g|png|gif)$/i.test(file.name)) {
+      return alert(file.name + " is not an image");
+    } // else...
+
+    const reader = new FileReader();
+
+    reader.addEventListener("load", function() {
+      const image = new Image();
+      image.height = 100;
+      image.title = file.name;
+      image.src = this.result;
+      preview.appendChild(image);
+    });
+
+    reader.readAsDataURL(file);
+
+  }
+
 }
 
-imgsDiv.addEventListener('click', function(e) {
-  const t = e.target;
-
-  if (t.classList.contains('del')) {
-    const filename = t.closest('.img-unit')?.dataset.file;
-
-    console.log(filename);
-    let loc = imgData.indexOf(filename);
-    if (loc !== -1) {
-      imgData.splice(loc, 1);
-      renderImgs();
-    }
-  }
-});
+document.querySelector('#pic').addEventListener("change", previewImages);
 
 
+
+// const loadFile = function(event) {
+//   const reader = new FileReader();
+//   reader.onload = function() {
+//     const output = document.getElementById('output');
+//     output.src = reader.result;
+//   };
+//   reader.readAsDataURL(event.target.files[0]);
+// };
 
 function sendData() {
 
@@ -209,10 +155,10 @@ function sendData() {
     isPass = false;
     title.nextElementSibling.innerHTML = '請輸入標題';
   }
-  // if (pic.files.length === 0) {
-  //   isPass = false;
-  //   pic.nextElementSibling.innerHTML = '請上傳照片';
-  // }
+  if (pic.files.length === 0) {
+    isPass = false;
+    pic.nextElementSibling.innerHTML = '請上傳照片';
+  }
   if (!desc.value) {
     isPass = false;
     desc.nextElementSibling.innerHTML = '請輸入敘述';
@@ -230,7 +176,7 @@ function sendData() {
   if (isPass) {
     const fd = new FormData(document.form1);
 
-    fetch('share_edit_api.php', {
+    fetch('share_add_api.php', {
         method: 'POST',
         body: fd,
       }).then(r => r.json())
@@ -239,8 +185,8 @@ function sendData() {
         if (obj.success) {
           alert('修改成功');
           location.href = 'share.php';
-
-
+          imgData.push(...obj.files);
+          console.log(imgData);
         } else {
 
           // document.querySelector('.modal-body').innerHTML = obj.error || '資料修改發生錯誤';

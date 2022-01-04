@@ -37,11 +37,11 @@ if(empty($title)) {
     $output['error'] = '請輸入正確標題';
     echo json_encode($output, JSON_UNESCAPED_UNICODE); exit;
 }
-// if(empty($pics)) {
-//     $output['code'] = 403;
-//     $output['error'] = '請上傳照片';
-//     echo json_encode($output, JSON_UNESCAPED_UNICODE); exit;
-// }
+if(empty($pics)) {
+    $output['code'] = 403;
+    $output['error'] = '請上傳照片';
+    echo json_encode($output, JSON_UNESCAPED_UNICODE); exit;
+}
 if(empty($desc)) {
     $output['code'] = 405;
     $output['error'] = '請輸入敘述';

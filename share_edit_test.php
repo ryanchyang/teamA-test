@@ -69,7 +69,7 @@ form .form-text {
 
             <div class="mb-3">
               <label for="pic" class="form-label">照片</label>
-              <input type="file" class="form-control visually-hidden" id="pic" name="pics[]" accept="image/*" multiple
+              <input type="file" class="form-control visually-hidden" id="pic" name="pic" accept="image/*" multiple
                 value="">
 
 
@@ -81,8 +81,10 @@ form .form-text {
 
 
               <div class="form-text"></div>
+              <div class="img-unit">
+                <p id="addpics">plus</p>
+              </div>
               <div id="imgs" class="d-flex flex-row " data-imgs="<?= $row['share_img'] ?>">
-
               </div>
             </div>
             <div class="mb-3">
@@ -126,11 +128,15 @@ const hashtags = document.querySelector('#hashtags');
 const htag1 = document.querySelector('#htag1');
 const htag2 = document.querySelector('#htag2');
 const htag3 = document.querySelector('#htag3');
+const addpics = document.querySelector('#addpics');
+
+console.log(addpics);
 
 let imgData = [];
+let picNum = 1;
 
 // const modal = new bootstrap.Modal(document.querySelector('#exampleModal'));
-
+imgData.push([title, file, a])
 // const email_re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
 // const mobile_re = /^09\d{2}-?\d{3}-?\d{3}$/;
 imgData.push(...imgsDiv.dataset.imgs.split(','))
@@ -174,10 +180,7 @@ function renderImgs() {
         <a href="#"><i class="fas fa-times-circle del"></i></a>
         </div> `;
 
-  imgsDiv.innerHTML += `<div
-        class="img-unit">
-        <a href="#" onclick="pic.click()"><i class="fas fa-plus my-plus"></i></a>
-        </div>`
+
 }
 
 imgsDiv.addEventListener('click', function(e) {
@@ -187,6 +190,9 @@ imgsDiv.addEventListener('click', function(e) {
     const filename = t.closest('.img-unit')?.dataset.file;
 
     console.log(filename);
+    imgData.findIndex(() => {
+      imgData[0] === title
+    })
     let loc = imgData.indexOf(filename);
     if (loc !== -1) {
       imgData.splice(loc, 1);
@@ -196,6 +202,21 @@ imgsDiv.addEventListener('click', function(e) {
 });
 
 
+addpics.addEventListener('click', function() {
+
+  const html =
+    `<input type="file" class="form-control visually-hidden" id="pic${picNum}" name="pic${picNum}" accept="image/*" multiple />`;
+  pic.insertAdjacentHTML('afterend', html);
+  const picUpload = document.querySelector(`#pic${picNum}`);
+  console.log(picUpload);
+  picUpload.click();
+  picNum++;
+
+
+
+
+
+})
 
 function sendData() {
 
