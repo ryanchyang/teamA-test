@@ -136,7 +136,7 @@ let imgData = [];
 let picNum = 1;
 
 // const modal = new bootstrap.Modal(document.querySelector('#exampleModal'));
-imgData.push([title, file, a])
+
 // const email_re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
 // const mobile_re = /^09\d{2}-?\d{3}-?\d{3}$/;
 imgData.push(...imgsDiv.dataset.imgs.split(','))
